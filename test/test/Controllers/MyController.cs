@@ -47,28 +47,13 @@ namespace test.Controllers
             using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
 
-                try
-                {
-                    await _repository.AddBook(bookEditionDto);
+                int id = await _repository.AddBook(bookEditionDto);
+               
 
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("ERROR 1");
-                    throw;
-                }
+                
+                await _repository.AddBookEdition(bookEditionDto, id);
 
-
-                try
-                {
-                    await _repository.AddBookEdition(bookEditionDto);
-
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("ERROR 2");
-                    throw;
-                }
+                
                 
                 scope.Complete();
             }

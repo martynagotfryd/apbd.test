@@ -99,9 +99,9 @@ public class Repository : IRepository
         return res;
     }
 
-    public async Task AddBook(BookEditionDto bookEditionDto)
+    public async Task<int> AddBook(BookEditionDto bookEditionDto)
     {
-        var query = @"INSERT INTO books VALUES(@Id, @BookTitle)";
+        var query = @"INSERT INTO books VALUES(@BookTitle); SELECT @@IDENTITY AS ID";
                 
         await using SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("Default")); 
         await using SqlCommand command = new SqlCommand();
@@ -113,10 +113,14 @@ public class Repository : IRepository
                 
         await connection.OpenAsync();
 
-        await command.ExecuteScalarAsync();
+        var id = await command.ExecuteScalarAsync();
+
+        if (id is null) throw new Exception();
+	    
+        return Convert.ToInt32(id);
     }
 
-    public async Task AddBookEdition(BookEditionDto bookEditionDto)
+    public async Task AddBookEdition(BookEditionDto bookEditionDto, int id)
     {
         var query = @"INSERT INTO books_editions VALUES(@Publisher, @BookId, @EditionTitile, @RealeaseDate)";
                 
@@ -127,7 +131,7 @@ public class Repository : IRepository
         command.CommandText = query;
         
         command.Parameters.AddWithValue("@Publisher", bookEditionDto.Publisher);
-        command.Parameters.AddWithValue("@BookId", bookEditionDto.IdBook);
+        command.Parameters.AddWithValue("@BookId", id);
         command.Parameters.AddWithValue("@EditionTitile", bookEditionDto.EditionTitle);
         command.Parameters.AddWithValue("@RealeaseDate", bookEditionDto.ReleaseDate);
                 
