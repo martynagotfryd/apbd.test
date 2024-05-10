@@ -7,9 +7,10 @@ public class BookEditionsDto
 
 public class BookEditionDto
 {
-    public int Id { get; set; }
+    public int IdBook { get; set; }
+    public int IdBookEdition { get; set; }
     public string BookTitle { get; set; } = string.Empty;
     public string EditionTitle { get; set; } = string.Empty;
-    public string Publisher { get; set; } = string.Empty;
+    public int Publisher { get; set; } 
     public DateTime ReleaseDate { get; set; }
 }

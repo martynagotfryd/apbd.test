@@ -1,3 +1,4 @@
+using System.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using test.Models.DTOs;
 using test.Repositories;
@@ -28,6 +29,51 @@ namespace test.Controllers
             BookEditionsDto bookEditionsDto = await _repository.GetEditions(id);
             
             return Ok(bookEditionsDto);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddBook(BookEditionDto bookEditionDto)
+        {
+            if (await _repository.DoesBookExist(bookEditionDto.IdBook))
+            {
+                return BadRequest("Book alredy exist");
+            }
+            
+            if (!await _repository.DoesBookExist(bookEditionDto.Publisher))
+            {
+                return NotFound("Publisher not found");
+            }
+            
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+
+                try
+                {
+                    await _repository.AddBook(bookEditionDto);
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ERROR 1");
+                    throw;
+                }
+
+
+                try
+                {
+                    await _repository.AddBookEdition(bookEditionDto);
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ERROR 2");
+                    throw;
+                }
+                
+                scope.Complete();
+            }
+
+            return Ok();
         }
         
     }
